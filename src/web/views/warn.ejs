@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcı Uyar (Danger Zone) - Vance Roleplay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: linear-gradient(135deg, #2a0808 0%, #1a0505 100%); color: #f8fafc; min-height: 100vh; }
+        .glass-panel { background: rgba(30, 0, 0, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 0, 0, 0.2); box-shadow: 0 8px 32px 0 rgba(255, 0, 0, 0.15); }
+    </style>
+</head>
+<body class="antialiased flex flex-col items-center p-8">
+
+    <nav class="glass-panel w-full max-w-5xl rounded-2xl mb-8 p-4 flex justify-between items-center bg-red-950/40">
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-orange-500">
+            Vance Roleplay Panel
+        </h1>
+        <div class="space-x-4 font-semibold text-sm">
+            <a href="/" class="hover:text-red-400 transition-colors">Ana Sayfa</a>
+            <a href="/logs" class="hover:text-red-400 transition-colors">Ticket Logları</a>
+            <a href="/applications" class="hover:text-red-400 transition-colors">Başvurular</a>
+            <a href="/dm" class="hover:text-red-400 transition-colors">Özel Mesaj Yolla</a>
+            <a href="/warn" class="text-red-400 transition-colors">Kullanıcı Uyar</a>
+            <a href="/send" class="hover:text-red-400 transition-colors">Mesaj Gönder</a>
+        </div>
+    </nav>
+
+    <main class="w-full max-w-2xl">
+        <div class="glass-panel rounded-3xl p-8 relative overflow-hidden">
+            <!-- Arka plan tehlike ikonu -->
+            <div class="absolute -right-10 -bottom-10 text-9xl opacity-5 select-none pointer-events-none">⚠️</div>
+
+            <h2 class="text-4xl font-black mb-2 flex items-center gap-3 text-red-500">
+                <span>DANGER ZONE</span>
+            </h2>
+            <p class="text-red-200/60 mb-8 font-medium">Bu alandan oyunculara direkt uyarı atabilirsiniz. Otomatik ceza sistemi devrededir.</p>
+            
+            <% if (success) { %>
+                <div class="bg-green-900/40 border border-green-500/50 text-green-300 p-4 rounded-xl mb-6 shadow-[0_0_15px_rgba(34,197,94,0.2)]">
+                    <%= success %>
+                </div>
+            <% } %>
+            
+            <% if (error) { %>
+                <div class="bg-red-900/60 border border-red-500 text-red-200 p-4 rounded-xl mb-6 shadow-[0_0_15px_rgba(239,68,68,0.4)] font-bold">
+                    🚨 <%= error %>
+                </div>
+            <% } %>
+
+            <form action="/api/warn" method="POST" class="space-y-6 relative z-10">
+                <div>
+                    <label for="userId" class="block text-sm font-bold text-red-300 mb-2 uppercase tracking-wider">Hedef Kullanıcı ID</label>
+                    <input type="text" id="userId" name="userId" required placeholder="Uyarmak istediğiniz kişinin Discord ID'si" class="w-full bg-red-950/30 border border-red-500/30 rounded-xl p-4 text-white placeholder-red-800/50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all font-mono">
+                </div>
+                
+                <div>
+                    <label for="reason" class="block text-sm font-bold text-red-300 mb-2 uppercase tracking-wider">Uyarı / Ceza Sebebi</label>
+                    <textarea id="reason" name="reason" rows="4" required placeholder="Açıkça sebebi belirtin..." class="w-full bg-red-950/30 border border-red-500/30 rounded-xl p-4 text-white placeholder-red-800/50 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all resize-none"></textarea>
+                </div>
+
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-500 text-white font-black py-4 rounded-xl shadow-[0_0_20px_rgba(220,38,38,0.4)] hover:shadow-[0_0_30px_rgba(220,38,38,0.6)] transition-all transform hover:-translate-y-1 mt-6 tracking-widest text-lg uppercase">
+                    Uyarıyı Gönder
+                </button>
+            </form>
+        </div>
+    </main>
+
+</body>
+</html>

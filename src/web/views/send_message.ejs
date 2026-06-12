@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesaj Gönder - Vance Roleplay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); color: #f8fafc; min-height: 100vh; }
+        .glass-panel { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+    </style>
+</head>
+<body class="antialiased flex flex-col items-center p-8">
+
+    <nav class="glass-panel w-full max-w-5xl rounded-2xl mb-8 p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            Vance Roleplay Panel
+        </h1>
+        <div class="space-x-4 font-semibold">
+            <a href="/" class="hover:text-blue-400 transition-colors">Ana Sayfa</a>
+            <a href="/logs" class="hover:text-blue-400 transition-colors">Ticket Logları</a>
+            <a href="/applications" class="hover:text-blue-400 transition-colors">Başvurular</a>
+            <a href="/dm" class="hover:text-blue-400 transition-colors">Özel Mesaj Yolla</a>
+            <a href="/warn" class="hover:text-blue-400 transition-colors">Kullanıcı Uyar</a>
+            <a href="/send" class="text-blue-400 transition-colors">Mesaj Gönder</a>
+        </div>
+    </nav>
+
+    <main class="w-full max-w-2xl">
+        <div class="glass-panel rounded-3xl p-8">
+            <h2 class="text-3xl font-extrabold mb-6 flex items-center gap-3">
+                <span>💬</span> Discord Kanalına Mesaj Gönder
+            </h2>
+            
+            <% if (success) { %>
+                <div class="bg-green-500/20 border border-green-500/50 text-green-300 p-4 rounded-xl mb-6">
+                    <%= success %>
+                </div>
+            <% } %>
+            
+            <% if (error) { %>
+                <div class="bg-red-500/20 border border-red-500/50 text-red-300 p-4 rounded-xl mb-6">
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <form action="/send" method="POST" class="space-y-6">
+                <!-- Temel Ayarlar -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="channelId" class="block text-sm font-medium text-gray-300 mb-2">Hedef Kanal ID *</label>
+                        <input type="text" id="channelId" name="channelId" required placeholder="Örn: 1515029601858883745" class="w-full bg-slate-800/50 border border-white/10 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label for="embedColor" class="block text-sm font-medium text-gray-300 mb-2">Embed Rengi</label>
+                        <input type="color" id="embedColor" name="embedColor" value="#5865F2" class="w-full h-14 bg-slate-800/50 border border-white/10 rounded-xl p-1 text-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="messageContent" class="block text-sm font-medium text-gray-300 mb-2">Normal Mesaj İçeriği (Düz Metin)</label>
+                    <textarea id="messageContent" name="messageContent" rows="3" placeholder="Sadece düz mesaj atmak isterseniz burayı doldurun..." class="w-full bg-slate-800/50 border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"></textarea>
+                </div>
+
+                <hr class="border-white/10 my-6">
+                
+                <h3 class="text-xl font-bold text-blue-300 mb-4">Embed (Gelişmiş Kutu) Ayarları</h3>
+
+                <div class="space-y-6">
+                    <div>
+                        <label for="embedTitle" class="block text-sm font-medium text-gray-300 mb-2">Embed Başlığı</label>
+                        <input type="text" id="embedTitle" name="embedTitle" placeholder="Kutunun başlığı..." class="w-full bg-slate-800/50 border border-white/10 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    
+                    <div>
+                        <label for="embedDesc" class="block text-sm font-medium text-gray-300 mb-2">Embed Açıklaması</label>
+                        <textarea id="embedDesc" name="embedDesc" rows="4" placeholder="Kutunun içerisindeki uzun metin..." class="w-full bg-slate-800/50 border border-white/10 rounded-xl p-4 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all resize-none"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="embedImage" class="block text-sm font-medium text-gray-300 mb-2">Görsel URL (İsteğe Bağlı)</label>
+                            <input type="text" id="embedImage" name="embedImage" placeholder="https://ornek.com/resim.png" class="w-full bg-slate-800/50 border border-white/10 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        </div>
+                        <div>
+                            <label for="embedFooter" class="block text-sm font-medium text-gray-300 mb-2">Alt Bilgi (Footer)</label>
+                            <input type="text" id="embedFooter" name="embedFooter" placeholder="Vance Roleplay Yönetim" class="w-full bg-slate-800/50 border border-white/10 rounded-xl p-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 mt-6">
+                    Mesajı Gönder
+                </button>
+            </form>
+        </div>
+    </main>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bekleyen Başvurular - Vance Roleplay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); color: #f8fafc; min-height: 100vh; }
+        .glass-panel { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+    </style>
+</head>
+<body class="antialiased flex flex-col items-center p-8">
+
+    <nav class="glass-panel w-full max-w-5xl rounded-2xl mb-8 p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            Vance Roleplay Panel
+        </h1>
+        <div class="space-x-4 font-semibold">
+            <a href="/" class="hover:text-blue-400 transition-colors">Ana Sayfa</a>
+            <a href="/logs" class="hover:text-blue-400 transition-colors">Ticket Logları</a>
+            <a href="/applications" class="text-blue-400 transition-colors">Başvurular</a>
+            <a href="/dm" class="hover:text-blue-400 transition-colors">Özel Mesaj Yolla</a>
+            <a href="/warn" class="hover:text-blue-400 transition-colors">Kullanıcı Uyar</a>
+            <a href="/send" class="hover:text-blue-400 transition-colors">Mesaj Gönder</a>
+        </div>
+    </nav>
+
+    <main class="w-full max-w-5xl">
+        <div class="glass-panel rounded-3xl p-8">
+            <h2 class="text-3xl font-extrabold mb-6 flex items-center gap-3">
+                <span>📋</span> Bekleyen Başvurular
+            </h2>
+            
+            <% if (success) { %>
+                <div class="bg-green-500/20 border border-green-500/50 text-green-300 p-4 rounded-xl mb-6">
+                    <%= success %>
+                </div>
+            <% } %>
+            
+            <% if (error) { %>
+                <div class="bg-red-500/20 border border-red-500/50 text-red-300 p-4 rounded-xl mb-6">
+                    <%= error %>
+                </div>
+            <% } %>
+
+            <% if (apps && apps.length > 0) { %>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <% apps.forEach(app => { %>
+                        <div class="bg-slate-800/50 border border-white/10 rounded-xl p-6 shadow-lg relative overflow-hidden">
+                            <div class="absolute top-0 right-0 bg-blue-600/80 text-xs px-3 py-1 rounded-bl-xl font-bold">
+                                <%= app.type %>
+                            </div>
+                            <div class="flex items-center gap-4 mb-4">
+                                <% if (app.avatar) { %>
+                                    <img src="<%= app.avatar %>" alt="Avatar" class="w-12 h-12 rounded-full border-2 border-blue-500">
+                                <% } else { %>
+                                    <div class="w-12 h-12 rounded-full bg-slate-700 border-2 border-blue-500 flex items-center justify-center">?</div>
+                                <% } %>
+                                <div>
+                                    <h3 class="font-bold text-lg"><%= app.isim %></h3>
+                                    <p class="text-sm text-gray-400"><%= app.userTag %> (<%= app.userId %>)</p>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-3 mb-6 text-sm">
+                                <div><span class="font-semibold text-blue-300">Karakter Adı:</span> <%= app.karakter %></div>
+                                <div><span class="font-semibold text-blue-300">Deneyim:</span> <span class="text-gray-300"><%= app.deneyim %></span></div>
+                                <div><span class="font-semibold text-blue-300">Neden Başvuruyor:</span> <span class="text-gray-300"><%= app.sebep %></span></div>
+                                <div class="text-xs text-gray-500 mt-2">Tarih: <%= new Date(app.createdAt).toLocaleString('tr-TR') %></div>
+                            </div>
+                            
+                            <div class="flex gap-3">
+                                <form action="/api/application/<%= app.id %>/action" method="POST" class="flex-1">
+                                    <input type="hidden" name="actionType" value="approve">
+                                    <input type="hidden" name="userId" value="<%= app.userId %>">
+                                    <button type="submit" class="w-full bg-green-500/20 hover:bg-green-500/40 border border-green-500/50 text-green-400 font-bold py-2 rounded-lg transition-colors">Onayla</button>
+                                </form>
+                                <form action="/api/application/<%= app.id %>/action" method="POST" class="flex-1">
+                                    <input type="hidden" name="actionType" value="reject">
+                                    <input type="hidden" name="userId" value="<%= app.userId %>">
+                                    <button type="submit" class="w-full bg-red-500/20 hover:bg-red-500/40 border border-red-500/50 text-red-400 font-bold py-2 rounded-lg transition-colors">Reddet</button>
+                                </form>
+                            </div>
+                        </div>
+                    <% }); %>
+                </div>
+            <% } else { %>
+                <div class="text-center py-12 text-gray-400">
+                    Bekleyen başvuru bulunmuyor. 🎉
+                </div>
+            <% } %>
+        </div>
+    </main>
+
+</body>
+</html>

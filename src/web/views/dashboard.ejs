@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vance Roleplay - Web Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0f172a',
+                        glass: 'rgba(30, 41, 59, 0.7)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col items-center p-8">
+
+    <nav class="glass-panel w-full max-w-5xl rounded-2xl mb-8 p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            Vance Roleplay Panel
+        </h1>
+        <div class="space-x-4 font-semibold">
+            <a href="/" class="text-blue-400 transition-colors">Ana Sayfa</a>
+            <a href="/logs" class="hover:text-blue-400 transition-colors">Ticket Logları</a>
+            <a href="/applications" class="hover:text-blue-400 transition-colors">Başvurular</a>
+            <a href="/dm" class="hover:text-blue-400 transition-colors">Özel Mesaj Yolla</a>
+            <a href="/warn" class="hover:text-blue-400 transition-colors">Kullanıcı Uyar</a>
+            <a href="/send" class="hover:text-blue-400 transition-colors">Mesaj Gönder</a>
+        </div>
+    </nav>
+
+    <main class="w-full max-w-5xl">
+        <div class="glass-panel rounded-3xl p-8">
+            <h2 class="text-3xl font-extrabold mb-6 flex items-center gap-3">
+                <span>🏆</span> Yetkili Liderlik Tablosu
+            </h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10 text-gray-400">
+                            <th class="p-4 font-semibold">Sıra</th>
+                            <th class="p-4 font-semibold">Yetkili</th>
+                            <th class="p-4 font-semibold">Çözülen Bilet</th>
+                            <th class="p-4 font-semibold">Ortalama Puan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (leaderboard.length === 0) { %>
+                            <tr>
+                                <td colspan="4" class="p-4 text-center text-gray-400">Henüz hiç bilet çözülmemiş.</td>
+                            </tr>
+                        <% } else { %>
+                            <% leaderboard.forEach((admin, index) => { %>
+                                <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                    <td class="p-4">
+                                        <% if (index === 0) { %> 🥇 <% } else if (index === 1) { %> 🥈 <% } else if (index === 2) { %> 🥉 <% } else { %> <%= index + 1 %> <% } %>
+                                    </td>
+                                    <td class="p-4 font-medium text-blue-300"><%= admin.username %></td>
+                                    <td class="p-4"><%= admin.tickets_handled %></td>
+                                    <td class="p-4 flex items-center gap-1 text-yellow-400">
+                                        <%= admin.avg_rating %> ⭐
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

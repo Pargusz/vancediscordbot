@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Logları - Vance Roleplay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); color: #f8fafc; min-height: 100vh; }
+        .glass-panel { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+    </style>
+    <script>
+        function openModal(id) {
+            document.getElementById('modal-' + id).classList.remove('hidden');
+        }
+        function closeModal(id) {
+            document.getElementById('modal-' + id).classList.add('hidden');
+        }
+    </script>
+</head>
+<body class="antialiased flex flex-col items-center p-8">
+
+    <nav class="glass-panel w-full max-w-5xl rounded-2xl mb-8 p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            Vance Roleplay Panel
+        </h1>
+        <div class="space-x-4 font-semibold">
+            <a href="/" class="hover:text-blue-400 transition-colors">Ana Sayfa</a>
+            <a href="/logs" class="text-blue-400 transition-colors">Ticket Logları</a>
+            <a href="/applications" class="hover:text-blue-400 transition-colors">Başvurular</a>
+            <a href="/dm" class="hover:text-blue-400 transition-colors">Özel Mesaj Yolla</a>
+            <a href="/warn" class="hover:text-blue-400 transition-colors">Kullanıcı Uyar</a>
+            <a href="/send" class="hover:text-blue-400 transition-colors">Mesaj Gönder</a>
+        </div>
+    </nav>
+
+    <main class="w-full max-w-5xl">
+        <div class="glass-panel rounded-3xl p-8">
+            <h2 class="text-3xl font-extrabold mb-6 flex items-center gap-3">
+                <span>📁</span> Ticket Logları
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <% if (tickets.length === 0) { %>
+                    <p class="text-gray-400">Kayıtlı bilet bulunamadı.</p>
+                <% } else { %>
+                    <% tickets.forEach(ticket => { %>
+                        <div class="glass-panel rounded-xl p-6 relative hover:-translate-y-1 transition-transform cursor-pointer" onclick="openModal('<%= ticket.id %>')">
+                            <h3 class="text-xl font-bold text-blue-300 mb-2"><%= ticket.channelName %></h3>
+                            <p class="text-sm text-gray-400 mb-4"><%= ticket.createdAt %></p>
+                            
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <p class="text-sm"><span class="text-gray-400">Üstlenen:</span> <%= ticket.claimerName %></p>
+                                    <p class="text-sm"><span class="text-gray-400">Açan:</span> <%= ticket.creatorName %></p>
+                                </div>
+                                <div class="text-yellow-400 font-bold text-lg">
+                                    <%= ticket.rating %> ⭐
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } %>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modalların Sayfa Dışına (Viewport'a) Taşınması -->
+    <% if (tickets && tickets.length > 0) { %>
+        <% tickets.forEach(ticket => { %>
+            <div id="modal-<%= ticket.id %>" class="fixed inset-0 bg-black/80 flex justify-center items-start overflow-y-auto hidden z-50 p-4 pt-10 pb-10" onclick="closeModal('<%= ticket.id %>')">
+                <div class="glass-panel w-full max-w-3xl rounded-2xl flex flex-col relative mt-8 mb-8" onclick="event.stopPropagation()">
+                    <div class="p-6 border-b border-white/10 flex justify-between items-center bg-slate-800/50 rounded-t-2xl">
+                        <h3 class="text-2xl font-bold"><%= ticket.channelName %> Detayları</h3>
+                        <button onclick="closeModal('<%= ticket.id %>')" class="text-gray-400 hover:text-white text-3xl font-bold leading-none">&times;</button>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <div class="grid grid-cols-2 gap-4 bg-black/20 p-4 rounded-lg">
+                            <p><span class="text-gray-400 block text-xs uppercase tracking-wider">Açan</span> <%= ticket.creatorName %></p>
+                            <p><span class="text-gray-400 block text-xs uppercase tracking-wider">Kapatan</span> <%= ticket.closerName %></p>
+                            <p><span class="text-gray-400 block text-xs uppercase tracking-wider">Üstlenen</span> <%= ticket.claimerName %></p>
+                            <p><span class="text-gray-400 block text-xs uppercase tracking-wider">Puan</span> <span class="text-yellow-400"><%= ticket.rating %> ⭐</span></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-xs uppercase tracking-wider mb-1">Kapatma Sebebi</p>
+                            <p class="bg-red-500/10 text-red-200 p-3 rounded-lg border border-red-500/20"><%= ticket.closeReason %></p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 text-xs uppercase tracking-wider mb-2">Konuşma Dökümü</p>
+                            <pre class="bg-[#0d1117] text-gray-300 p-4 rounded-lg overflow-x-auto text-sm border border-white/5 whitespace-pre-wrap"><%= ticket.transcript %></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% }) %>
+    <% } %>
+
+</body>
+</html>

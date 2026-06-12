@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Özel Mesaj (DM) Paneli - Vance Roleplay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); color: #f8fafc; min-height: 100vh; }
+        .glass-panel { background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+        .chat-container::-webkit-scrollbar { width: 6px; }
+        .chat-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+    </style>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+</head>
+<body class="antialiased flex flex-col items-center p-8">
+
+    <nav class="glass-panel w-full max-w-6xl rounded-2xl mb-8 p-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            Vance Roleplay Panel
+        </h1>
+        <div class="space-x-4 font-semibold text-sm">
+            <a href="/" class="hover:text-blue-400 transition-colors">Ana Sayfa</a>
+            <a href="/logs" class="hover:text-blue-400 transition-colors">Ticket Logları</a>
+            <a href="/applications" class="hover:text-blue-400 transition-colors">Başvurular</a>
+            <a href="/dm" class="text-blue-400 transition-colors">Özel Mesaj Yolla</a>
+            <a href="/warn" class="hover:text-blue-400 transition-colors">Kullanıcı Uyar</a>
+            <a href="/send" class="hover:text-blue-400 transition-colors">Mesaj Gönder</a>
+        </div>
+    </nav>
+
+    <main class="w-full max-w-6xl">
+        <div class="glass-panel rounded-3xl p-6 h-[700px] flex overflow-hidden">
+            
+            <!-- Sol Menü: Kullanıcı Listesi -->
+            <div class="w-1/3 bg-slate-900/50 border-r border-white/10 flex flex-col sidebar rounded-l-2xl">
+                <div class="p-4 border-b border-white/10 bg-slate-800/80">
+                    <h2 class="text-xl font-bold flex items-center gap-2"><span>💬</span> DM Görüşmeleri</h2>
+                </div>
+                <div class="flex-1 overflow-y-auto p-2 space-y-1">
+                    <!-- Yeni sohbet başlatma -->
+                    <div class="mb-4 p-2">
+                        <form action="/dm" method="GET" class="flex gap-2">
+                            <input type="text" name="newId" placeholder="Discord ID ile başlat..." class="flex-1 bg-slate-800 border border-white/10 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-3 py-2 rounded-lg text-sm font-bold transition-colors">+</button>
+                        </form>
+                    </div>
+
+                    <% if (dms && dms.length > 0) { %>
+                        <% dms.forEach(dm => { %>
+                            <a href="/dm?u=<%= dm.userId %>" class="flex items-center gap-3 p-3 rounded-xl transition-all cursor-pointer <%= activeUser === dm.userId ? 'bg-blue-600/30 border border-blue-500/50' : 'hover:bg-white/5 border border-transparent' %>">
+                                <img src="<%= dm.meta.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png' %>" class="w-10 h-10 rounded-full bg-slate-700">
+                                <div class="overflow-hidden flex-1">
+                                    <h3 class="font-bold text-sm truncate text-white"><%= dm.meta.userTag %></h3>
+                                    <p class="text-xs text-gray-400 truncate"><%= dm.meta.lastMessage || 'Sohbet başladı' %></p>
+                                </div>
+                            </a>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="text-center text-gray-500 text-sm mt-10 p-4">
+                            Henüz kimseyle DM'den konuşulmadı. Yukarıdan ID girerek başlatabilirsiniz.
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Sağ Panel: Sohbet Ekranı -->
+            <div class="w-2/3 flex flex-col bg-slate-900/80 rounded-r-2xl">
+                <% if (activeChat) { %>
+                    <!-- Sohbet Başlığı -->
+                    <div class="p-4 border-b border-white/10 bg-slate-800/80 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <img src="<%= activeChat.meta.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png' %>" class="w-10 h-10 rounded-full">
+                            <div>
+                                <h2 class="font-bold text-lg"><%= activeChat.meta.userTag %></h2>
+                                <p class="text-xs text-gray-400">ID: <%= activeUser %></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mesajlar -->
+                    <div class="flex-1 overflow-y-auto p-6 chat-container flex flex-col gap-4" id="chatBox">
+                        <% if (activeChat.messages && activeChat.messages.length > 0) { %>
+                            <% activeChat.messages.forEach(msg => { %>
+                                <% if (msg.direction === 'incoming') { %>
+                                    <!-- Karşı taraf (Gelen) -->
+                                    <div class="flex flex-col items-start max-w-[80%]">
+                                        <div class="bg-slate-700 text-white p-3 rounded-2xl rounded-tl-sm shadow-md">
+                                            <%- formatMessageContent(msg.content) %>
+                                            <% if (msg.attachments && msg.attachments.length > 0) { %>
+                                                <div class="mt-2 space-y-2">
+                                                <% msg.attachments.forEach(url => { %>
+                                                    <a href="<%= url %>" target="_blank">
+                                                        <img src="<%= url %>" class="max-w-xs rounded-lg hover:opacity-80 transition-opacity" alt="Medya">
+                                                    </a>
+                                                <% }) %>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        <span class="text-[10px] text-gray-500 mt-1 ml-1"><%= new Date(msg.timestamp).toLocaleString('tr-TR', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}) %></span>
+                                    </div>
+                                <% } else { %>
+                                    <!-- Bot/Panel (Giden) -->
+                                    <div class="flex flex-col items-end self-end max-w-[80%]">
+                                        <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-sm shadow-md">
+                                            <%- formatMessageContent(msg.content) %>
+                                            <% if (msg.attachments && msg.attachments.length > 0) { %>
+                                                <div class="mt-2 space-y-2">
+                                                <% msg.attachments.forEach(url => { %>
+                                                    <a href="<%= url %>" target="_blank">
+                                                        <img src="<%= url %>" class="max-w-xs rounded-lg hover:opacity-80 transition-opacity" alt="Medya">
+                                                    </a>
+                                                <% }) %>
+                                                </div>
+                                            <% } %>
+                                        </div>
+                                        <span class="text-[10px] text-gray-500 mt-1 mr-1"><%= new Date(msg.timestamp).toLocaleString('tr-TR', {hour:'2-digit', minute:'2-digit', day:'2-digit', month:'2-digit'}) %></span>
+                                    </div>
+                                <% } %>
+                            <% }) %>
+                        <% } else { %>
+                            <div class="m-auto text-gray-500 text-sm">Hiç mesaj yok. Bir şeyler yazarak sohbeti başlatın.</div>
+                        <% } %>
+                    </div>
+
+                    <!-- Mesaj Gönderme Kutusu -->
+                    <div class="p-4 border-t border-white/10 bg-slate-800/50 relative">
+                        <!-- Emoji Picker Container (Hidden by default) -->
+                        <div id="emojiPickerContainer" class="absolute bottom-20 left-4 hidden z-50">
+                            <emoji-picker class="dark"></emoji-picker>
+                        </div>
+                        
+                        <form action="/api/dm/<%= activeUser %>/send" method="POST" enctype="multipart/form-data" class="flex gap-3 items-center">
+                            
+                            <!-- Dosya Seçici Butonu -->
+                            <label for="attachment" class="cursor-pointer text-gray-400 hover:text-white transition-colors" title="Resim/Dosya Ekle">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                </svg>
+                            </label>
+                            <input type="file" id="attachment" name="attachment" class="hidden" onchange="document.getElementById('fileName').textContent = this.files[0] ? '📎 ' + this.files[0].name : ''">
+                            
+                            <!-- Emoji Butonu -->
+                            <button type="button" id="emojiBtn" class="text-gray-400 hover:text-yellow-400 transition-colors" title="Emoji Ekle">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </button>
+
+                            <div class="flex-1 relative">
+                                <input type="text" id="messageInput" name="message" placeholder="Mesaj yazın..." class="w-full bg-slate-900 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-32">
+                                <span id="fileName" class="absolute right-3 top-3 text-xs text-blue-300 font-bold bg-blue-900/50 px-2 py-1 rounded empty:hidden max-w-[120px] truncate"></span>
+                            </div>
+
+                            <button type="submit" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-transform hover:scale-105">
+                                Gönder 🚀
+                            </button>
+                        </form>
+                    </div>
+                <% } else { %>
+                    <div class="flex-1 flex flex-col items-center justify-center text-gray-500">
+                        <div class="text-6xl mb-4">💬</div>
+                        <h2 class="text-xl font-bold text-white mb-2">Özel Mesaj Paneli</h2>
+                        <p>Sohbeti görüntülemek için sol taraftan bir kullanıcı seçin.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Sayfa yüklendiğinde sohbeti en alta kaydır
+        const chatBox = document.getElementById('chatBox');
+        if (chatBox) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Emoji Picker Mantığı
+        const emojiBtn = document.getElementById('emojiBtn');
+        const emojiPickerContainer = document.getElementById('emojiPickerContainer');
+        const messageInput = document.getElementById('messageInput');
+        
+        if (emojiBtn && emojiPickerContainer) {
+            emojiBtn.addEventListener('click', () => {
+                emojiPickerContainer.classList.toggle('hidden');
+            });
+
+            document.querySelector('emoji-picker').addEventListener('emoji-click', event => {
+                messageInput.value += event.detail.unicode;
+                emojiPickerContainer.classList.add('hidden');
+                messageInput.focus();
+            });
+
+            // Click outside to close
+            document.addEventListener('click', (e) => {
+                if (!emojiBtn.contains(e.target) && !emojiPickerContainer.contains(e.target)) {
+                    emojiPickerContainer.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

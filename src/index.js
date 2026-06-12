@@ -3,7 +3,6 @@ const { Client, GatewayIntentBits, Partials, Collection, REST, Routes, ModalBuil
 const fs = require('fs');
 const path = require('path');
 const discordTranscripts = require('discord-html-transcripts');
-const { startWebPanel } = require('./webpanel');
 const startWebServer = require('./web');
 const { saveTicketLog, updateAdminStats, saveApplication } = require('./firebase');
 
@@ -64,7 +63,6 @@ client.once('ready', async () => {
     client.user.setActivity('Vance Roleplay Yönetim', { type: 0 });
 
     // Web paneli başlat
-    startWebPanel(client);
     startWebServer(client);
 
     const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
